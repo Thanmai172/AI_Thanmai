@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 
+conversation_history = []
 # Load .env
 load_dotenv()
 
@@ -73,59 +74,33 @@ def home():
 @app.post("/chat")
 def chat(prompt: Prompt):
 
+    global conversation_history
+
     try:
 
-        # ---------------------
-        # Gemini
-        # ---------------------
-        if provider == "gemini":
+        conversation_history.append({
+            "role": "user",
+            "content": prompt.message
+        })
 
-            response = gemini_model.generate_content(
-                prompt.message
-            )
+        response = groq_client.chat.completions.create(
+            messages=conversation_history,
+            model="llama-3.3-70b-versatile"
+        )
 
-            return {
-                "provider": "Gemini",
-                "reply": response.text
-            }
+        assistant_reply = response.choices[0].message.content
 
-        # ---------------------
-        # Groq
-        # ---------------------
-        elif provider == "groq":
+        conversation_history.append({
+            "role": "assistant",
+            "content": assistant_reply
+        })
 
-            response = groq_client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt.message
-                    }
-                ],
-                model="llama-3.3-70b-versatile"
-            )
-
-            return {
-                "provider": "Groq",
-                "reply": response.choices[0].message.content
-            }
-
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid AI_PROVIDER in .env"
-            )
+        return {
+            "reply": assistant_reply
+        }
 
     except Exception as e:
-
-        error_message = str(e)
-
-        if "quota" in error_message.lower() or "429" in error_message:
-            raise HTTPException(
-                status_code=429,
-                detail="API quota exceeded. Please try again later."
-            )
-
         raise HTTPException(
             status_code=500,
-            detail=error_message
+            detail=str(e)
         )
