@@ -6,20 +6,20 @@ function InputBox({
   sendMessage
 }) {
   return (
-    <div className="input-box">
+    <div className="input-container">
 
       <input
         type="text"
-        placeholder="Type your message..."
+        placeholder="Ask Thanmai anything..."
         value={message}
         onChange={(e) =>
           setMessage(e.target.value)
         }
       />
 
-     <button onClick={sendMessage}>
-        <IoSend size={22} />
-    </button>
+      <button onClick={sendMessage}>
+        <IoSend />
+      </button>
 
     </div>
   );
