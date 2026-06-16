@@ -23,6 +23,9 @@ npm create vite@latest . -- --template react
 npm install
 npm install axios
 
+To add the Icons :
+npm install react-icons
+
 
 To run the Application in the frontend
 npm run dev
